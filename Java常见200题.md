@@ -199,3 +199,66 @@ Arrays. asList(array);
 - 线程安全：Vector 使用了Synchronized来实现线程同步，是线程安全的，而ArrayList是非线程安全的。
 - 性能： ArrayList在性能方面要优于Vector。
 - 扩容：ArrayLsit和Vector都会根据实际的需要动态的调整容量，只不过在Vector扩容每次会增加1倍，而ArrayList只会增加50%
+
+### 24 Array和ArrayList有何区别？
+- Array可以存储基本数据类型和对象，ArrayList只能存储对象。
+- Array是指定固定大小的，而ArrayList大小是自动扩展的。
+- Array内置方法没有ArrayList多，比如addAll,removeAll,iteration等方法只有ArrayList有。
+
+### 25 在Queue中poll()和remove()有什么区别？
+相同点：都是返回第一个元素，并在队列中删除返回的对象。
+
+不同点：如果没有元素poll()会返回null，而remove()会直接抛出NoSuchElementException异常。
+```
+Queue<String> queue = new LinkedList<String>();
+queue. offer("string"); // add
+System. out. println(queue. poll());
+System. out. println(queue. remove());//抛异常
+System. out. println(queue. size());
+```
+
+### 26. 哪些集合类是线程安全的？
+
+
+Vector、Hashtable、Stack都是线程安全的，而像HashMap则是非线程安全的，不过在jdk1.5之后，随着JUC并发包的出现，他们也有了自己对应的线程安全类，比如HashMap对应的线程安全类就是ConcurrentHashMap。
+
+### 27. 迭代器Iterator是什么？
+Iterator接口提供遍历任何Collection的接口。我们可以从一个Collection中使用迭代器方法来获取迭代器实例。迭代器取代了Java集合框架中的Enumeration，迭代器允许调用者在迭代过程中移除元素。
+使用代码如下：
+```Java
+List<String>list=new ArrayList<>();
+Iterator<String>it=list.iterator();
+while(it.hasNext()){
+    String obj=it.next();
+    System.out.println(obj);
+}
+```
+Iterator的特点是更加安全，因为它可以确保，在当前遍历的集合元素被更改的时候，就会抛出ConcurrentModificationException异常。
+
+### 28.Iterator和ListIterator有什么区别？
+
+- Iterator可以遍历Set和List集合，而LsitIterator只能遍历List。
+- Iterator只能单向遍历，而ListIterator可以双向遍历。
+- ListIterator从Iterator接口继承，然后添加了一些额外的功能，比如添加一个元素，替换一个元素，获取前面或后面元素的索引位置。
+
+### 29.怎么确保一个集合不能被修改？
+可以使用Collections.unmodifiableCollection(Collection c)方法来创建一个只读集合，这样改变集合的操作都会抛出Java.lang.UnsupportedOperationException异常。
+示例代码：
+```
+List<String> list = new ArrayList<>();
+list. add("x");
+Collection<String> clist = Collections. unmodifiableCollection(list);
+clist. add("y"); // 运行时此行报错
+System. out. println(list. size());
+```
+## 多线程
+### 30.并行与并发有什么区别？
+- 并行：一个处理器同时处理多个任务。
+- 并发：多个处理器或多核处理器同时处理多个不同的任务。
+
+### 31.线程和进程区别？
+- 进程是资源分配的基本单位，它是程序执行时的一个实例。程序运行时系统就会创建一个进程，并为它分配资源，然后把该进程放入进程就绪队列，进程调度器选中它的时候就会为它分配CPU时间，程序开始真正运行。
+- 线程是程序执行时的最小单位，它是进程的一个执行流，是CPU调度和分派的基本单位，一个进程可以由很多个线程组成，线程间共享进程的所有资源，每个线程有自己的堆栈和局部变量。线程由CPU独立调度执行，在多CPU环境下就允许多个线程同时运行。同样多线程也可以实现并发操作，每个请求分配一个线程来处理。
+- 进程有自己的独立地址空间，每启动一个进程，系统就会为它分配地址空间，建立数据表来维护代码段、堆栈段和数据段，这种操作非常昂贵。而线程是共享进程中的数据的，使用相同的地址空间，因此CPU切换一个线程的花费要远比进程要小很多，同时创建一个线程的开销也比进程要小很多。
+- 线程之间的通信更方便，同一进程下的线程共享全局变量、静态变量等数据，而进程之间的通信需要以通信的方式（IPC）进行，不过如何处理好同步与互斥是编写多线程程序的难点。
+- 多进程程序更加健壮，多线程只要有一个线程死掉，整个进程也死掉了，而一个进程死掉并不会对另外一个进程造成影响，因为进程有自己独立的地址空间。
