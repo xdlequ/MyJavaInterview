@@ -262,3 +262,178 @@ System. out. println(list. size());
 - 进程有自己的独立地址空间，每启动一个进程，系统就会为它分配地址空间，建立数据表来维护代码段、堆栈段和数据段，这种操作非常昂贵。而线程是共享进程中的数据的，使用相同的地址空间，因此CPU切换一个线程的花费要远比进程要小很多，同时创建一个线程的开销也比进程要小很多。
 - 线程之间的通信更方便，同一进程下的线程共享全局变量、静态变量等数据，而进程之间的通信需要以通信的方式（IPC）进行，不过如何处理好同步与互斥是编写多线程程序的难点。
 - 多进程程序更加健壮，多线程只要有一个线程死掉，整个进程也死掉了，而一个进程死掉并不会对另外一个进程造成影响，因为进程有自己独立的地址空间。
+
+### 32.守护线程是什么？
+守护线程是运行在后台的一种特殊进程，
+**它独立于控制终端并且周期性的执行某种任务或等待处理某些发生的事件。**
+在Java中垃圾回收线程就是特殊的守护线程。
+
+### 33.创建线程的方式
+创建线程的三种方式：
+- 继承Thread并重写run方法
+- 实现Runnable接口
+- 实现Callable接口
+
+### 34. Runnable和callable有什么区别？
+runnable没有返回值，callable可以拿到有返回值，callable可以看做是runnable的补充。
+
+### 35.线程有哪些状态？
+- NEW 尚未启动
+- RUNNABLE 正在执行中
+- BLOCKED 阻塞的（被同步锁或者IO锁阻塞）
+- WAITING 永久等待状态
+- TIMED_WAITING 等待指定的事件重新被唤醒的状态
+- TERMINATED 执行完成
+
+### 36. sleep()和wait()有什么区别？
+类的不同：sleep来自Thread类，而wait来自Object类
+释放锁： sleep不释放锁，wait释放锁
+用法不同： sleep时间到会自动恢复，wait可以使用notify/notifyAll()直接唤醒。
+
+### 37.notify和notifyAll有啥区别？
+notifyAll()会唤醒所有的线程，notify()只会唤醒一个线程。notifyAll()调用后，会将全部线程由等待池转移到锁池，然后参与锁的竞争。竞争成功则继续执行，如果不成功则留在锁池等待被释放后再次参与竞争。而notify()只会唤醒一个线程，具体唤醒哪一个线程，由虚拟机控制。
+
+### 38.线程的run和start有什么区别？
+
+start方法用于启动线程，run方法用于执行线程的运行时代码，run可以重复调用，而start只能调用一次。
+
+### 39.线程池相关问题
+**1. 什么是线程池？**
+
+顾名思义就是实现创建若干个可以执行的线程放入一个(容器)池中，需要的时候从池中获取线程不用自行创建，使用完毕不需要销毁线程，而是放入池中，从而减少创建和销毁线程对象的开销。线程池也是一种多线程处理形式，处理过程中将任务添加到队列，然后在创建线程后自动启动这些任务。
+
+**2. 线程池创建的方式**
+- newSingleThreadExecutor()：它的特点在于工作线程数目被限制为1，操作一个无界的工作队列，所以它保证了所有任务的都是被顺序执行，最多会有一个任务处于活动状态，并且不允许使用者改动线程池实例，因此可以避免其改变线程数目
+- newCachedThreadPool()：它是一种用来处理大量短时间工作任务的线程池，具有几个鲜明特点：它会试图缓存线程并重用，当无缓存线程可用时，就会创建新的工作线程；如果线程闲置的时间超过 60 秒，则被终止并移出缓存；长时间闲置时，这种线程池，不会消耗什么资源。其内部使用 SynchronousQueue 作为工作队列；
+- newFixedThreadPool(int nThreads)：重用指定数目（nThreads）的线程，其背后使用的是无界的工作队列，任何时候最多有 nThreads 个工作线程是活动的。这意味着，如果任务数量超过了活动队列数目，将在工作队列中等待空闲线程出现；如果有工作线程退出，将会有新的工作线程被创建，以补足指定的数目 nThreads；
+- newSingleThreadScheduledExecutor()：创建单线程池，返回 ScheduledExecutorService，可以进行定时或周期性的工作调度；
+- newScheduledThreadPool(int corePoolSize)：和newSingleThreadScheduledExecutor()类似，创建的是个 ScheduledExecutorService，可以进行定时或周期性的工作调度，区别在于单一工作线程还是多个工作线程；
+- newWorkStealingPool(int parallelism)：这是一个经常被人忽略的线程池，Java 8 才加入这个创建方法，其内部会构建ForkJoinPool，利用Work-Stealing算法，并行地处理任务，不保证处理顺序；
+- ThreadPoolExecutor()：是最原始的线程池创建，上面1-3创建方式都是对ThreadPoolExecutor的封装。
+
+**3.线程池的基本组成**
+
+线程管理器(ThreadPool)：用于创建并管理线程池，包括创建线程，销毁线程池，添加新任务等。
+
+工作线程(PollWorker) 线程池中的线程，在没有任务时，处于等待状态，可以循环的执行任务。
+
+任务接口(task) 每个任务必须实现的接口，以供工作线程调度任务的执行，它主要规定了任务的入口，任务执行完成的收尾工作，任务的执行状态等。
+
+任务队列(taskQueue)用于存放没有处理的任务，提供一种缓冲机制。
+
+**4.线程池的好处**
+
+1.重用存在的线程池，较少对象的创建以及消亡的开销，性能好。
+
+2.可有效地控制最大并发线程数，提高系统资源利用率，同时避免过多的资源竞争，避免阻塞。
+
+3.可以提供定期执行，定时执行，单线程，并发控制等功能。
+
+**5.线程池中 submit() 和 execute() 方法有什么区别？**
+
+execute()只能执行Runnable类型的任务。
+
+submit() 可以执行Runnable和Callable类型的任务。
+
+Callable类型的任务可以获取执行的返回值，而Runnable执行无返回值。
+
+### 40.Java程序中怎么保证多线程的运行安全？
+
+1.使用安全类，比如java.util.concurrent的类。
+
+2.使用自动锁 synchronized
+
+3.使用手动锁Lock
+
+手动锁代码如下：
+```
+Lock lock=new ReentrantLock();//
+lock.lock();
+try{
+    System.out.println("获得锁");
+}catch(Exception e){
+    //TODO handle exception
+}finally{
+    System.out.println("释放锁");
+    lock.unlock();
+}
+```
+
+### 41.多线程中synchronized锁升级的原理是什么？
+synchronized 锁升级原理：在锁对象的对象头里有一个thread id 字段，在第一次访问的时候，thread id为空，jvm让其持有偏向锁，并将thread id 设置为其线程id，再次进入的时候会先判断thread id是否与其线程id一致，如果一致则可以直接使用此对象，如果不一致，则升级偏向锁为轻量级锁，通过自旋循环一定次数来获取锁，执行一定次数后，如果还没有正常获取到要使用的对象，此时就会把锁从轻量级升级为重量级锁，此过程就构成了synchronized锁的升级。
+
+锁升级的目的：锁升级是为了降低锁带来的性能消耗，在Java6之后优化synchronized的实现方式，使用了偏向锁升级为轻量级锁再升级为重量级锁的方式，从而减低锁带来的性能消耗。
+
+### 42.什么是死锁？
+
+当线程A持有独占锁a，并尝试去获取独占锁b的同时，线程B持有独占锁b，并尝试获取独占锁a的情况下，就会发生AB两个线程由于互相持有对方需要的锁，而发生的阻塞现象，我们称为死锁。
+
+### 43.怎么防止死锁？
+
+- 尽量使用tryLock(Long timeout,TimeUnit unit)的方法(ReentrantLock,ReentrantReadWriteLock)设置超时时间，超时可以退出防止死锁。
+- 尽量使用java.util.concurrent并发类代替自己手写锁.
+- 尽量降低锁的使用粒度，尽量不要几个功能共用同一把锁。
+- 尽量减少同步的代码块。
+
+### 44.ThreadLocal是什么？有哪些使用场景？
+ThreadLocal为每个使用该变量的线程提供独立的变量副本，所以每个线程都可以独立的改变自己的副本，而不会影响其他线程所对应的副本。
+ThreadLocal的经典使用场景是数据库连接和session管理等。
+
+### 45. synchronized底层实现原理
+synchronized是由一对monitorenter/monitorexit指令实现的，monitor对象是同步的基本实现单元。在java6之前，monitor的实现是依靠操作系统内部的互斥锁，因为需要进行用户态到内核态的切换，所以同步操作时一个无差别的重量级操作，性能也很低。但在java6的时候，Java虚拟机做出了改进，提供了三种不同的monitor实现，即偏向锁，轻量级锁，和重量级锁，大大改进了其性能。
+
+### 46. synchronized 和volatile的区别是什么？
+
+- volatile 是变量修饰符;synchronized是修饰类、方法、代码段。
+- volatile 仅能实现变量的修改可见性，不能保证原子性；而synchronized则可以保证变量的修改可见性和原子性。
+- volatile不会造成线程的阻塞，synchronized可能会造成线程的阻塞。
+- 性能方面，synchronized可以防止多个线程同时执行一段代码，会影响程序执行效率。而volatile在某些情况下，性能要优于synchronized。但volatile无法取代synchronized。
+-  volatile标记的变量不会被编译器优化，synchronized变量可以被编译器优化。
+
+### 47 synchronized与Lock有什么区别？
+- synchronized 可以给类，方法，代码块加锁；而lock只能给代码块加锁。
+- synchronized不需要手动获取锁和释放锁，使用简单，发生异常会自动释放锁，不会造成死锁；而lock需要自己加锁和释放锁，如果使用不当没有unlock()去释放锁就会造成死锁。
+- 通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。
+
+### 48. synchronized和ReentrantLock区别是什么？
+synchronized早起的实现比较低效，对比ReentrantLock，大多数场景性能都相差较大，但是在Java6对synchronized进行了很多的改进。主要区别如下：
+- ReentrantLock使用起来比较灵活，但是必须有释放锁的配合动作；
+- ReentrantLock必须手动获取与释放锁，而synchronized可用于修饰方法，代码块等。
+
+### 49 atomic原理
+atomic主要利用CAS(Compare and swap)和volatile和native方法来保证原子操作，从而避免synchronized的高开销，执行效率大为提升。
+
+## 反射
+
+### 50.什么是反射？
+反射是在运行状态中，对于任意一个雷，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性，这种动态获取的信息以及动态调用对象的方法的功能称为Java语言的反射机制。
+
+### 51.什么是Java序列化？什么情况下需要序列化？
+Java序列化为了保存各种对象在内存中的状态，并且可以把保存的对象状态在读出来。以下情况需要Java序列化：
+- 想把内存中的对象状态保存到一个文件中或者数据库中。
+- 想用套接字在网络上传送对象的时候。
+- 想通过远程方法调用传输对象的时候。
+
+### 52 动态代理是什么？有哪些应用？
+
+动态代理是运行时动态生成代理类。
+动态代理的应用有spring aop，hibernate数据查询、测试框架的后端mock，rpc，Java注解对象获取等。
+
+### 53 怎么实现动态代理
+Jdk原生动态代理和cglib动态代理。JDK原生动态代理是基于接口实现的，而cglib是基于继承当前类的子类实现的。
+
+## 对象拷贝
+
+### 54.为什么要使用克隆？
+克隆的对象可能包含一些已经修改过的属性，而new出来的对象的属性都还是初始化时候的值，所以当需要一个新的对象来保存当前对象的状态，就靠克隆的方法。
+
+### 55.如何实现对象克隆
+- 实现cloneable接口并重写Object类中的clone()方法。
+- 实现Serializable接口，通过对象的序列化和反序列化实现克隆，可以实现真正的深度克隆。
+
+### 56.深拷贝和浅拷贝的区别是什么？
+
+- 浅拷贝：当对象被复制时，只复制它本身和其中包含的值类型的成员变量。而引用类型的成员对象并没有复制。
+- 深拷贝：除对象本身被复制外，对象所包含的所有成员变量也将复制。
+
+
