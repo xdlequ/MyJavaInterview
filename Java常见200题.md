@@ -49,12 +49,14 @@ public int hashCode(){
 1. 若两个对象相同，则他们的hashCode一定相同。
 2. 若两个对象的hashCode相同，他们并不一定equals。
 
-### 4.final在Java中有什么作用？finally呢
+### 4.final在Java中有什么作用？finally呢，finalize
 - final修饰的类叫最终类，该类不能被继承。
 - final修饰的方法不能被重写。
 - final修饰的变量叫做常量，常量必须初始化，初始化之后，值就不能被修改。
 
 finally作为异常处理的一部分，只能用在try/catch语句之中，并且附带了一个语句块，表示这段语句最终一定会被执行，经常被用在需要释放资源的情况下使用。
+
+finalize： 是 Object 类的一个方法，在垃圾收集器执行的时候会调用被回收对象的此方法。
 
 ### 5.String属于基础数据类型吗？
 Java中基础数据类型有8种，分别为：int，short，long，double,float,boolean,char,byte.
@@ -436,4 +438,262 @@ Jdk原生动态代理和cglib动态代理。JDK原生动态代理是基于接口
 - 浅拷贝：当对象被复制时，只复制它本身和其中包含的值类型的成员变量。而引用类型的成员对象并没有复制。
 - 深拷贝：除对象本身被复制外，对象所包含的所有成员变量也将复制。
 
+## JavaWeb
 
+### 57. JSP和servlet有什么区别
+JSP是servlet技术的扩展，本质上就是servlet的简易方式。servlet和JSP最大的不同的在于servlet的应用逻辑是在Java文件中，并且完全从表示层中的html里分离开来，而JSP的情况是Java和html可以组合成一个扩展名为JSP的文件，JSP侧重于视图，servlet主要用于控制逻辑。
+
+### 58. session和cookie有什么区别？
+- 存储位置不同：session存储在服务器端，cookie存储在浏览器端。
+- 安全性不同：cookie安全性一般，在浏览器存储，可以被伪造和修改。
+- 容量和个数限制：cookie有容量限制，每个站点下的cookie也有个数限制。
+- 存储的多样性：session可以存储在Redis中、数据库中，应用程序中，而cookie只能存储在浏览器中。
+
+### 59.session工作原理
+session的工作原理是客户端登录完成之后，服务器会创建对应的session，session创建完之后，会把session的id发送给客户端，客户端再存储到浏览器中。这样客户端每次访问服务器时，都会带着session id，服务器拿到session id之后，在内存找到与之对应的session这样就可以正常工作了。
+
+### 60.如果客户端禁止cookie能实现session还能用吗？
+可以用，session只是依赖cookie存储session id，如果cookie被禁用了，可以使用url中添加session id的方式保证session能正常使用。
+
+### 61.springmvc和struts的区别是什么？
+
+拦截级别：struts2是类级别的拦截，springmvc是方法级别的拦截。
+
+数据独立性： springmvc的方法之间基本上独立的，独享request和response数据，请求数据通过参数获取，处理结果通过ModelMap交回给框架，方法之间不共享变量，而struts2虽然方法之间也是独立的，但其所有action变量是共享的，这不会影响程序运行，但会带来一定麻烦
+
+拦截机制：struts2有自己的拦截机制，springmvc用的是独立的aop方式，这样导致struts2的配置文件量比springmvc大。
+
+### 62.如何避免sql注入？
+- 使用预处理Preparedstatement
+- 使用正则表达式过滤掉字符串中的特殊字符。
+
+### 63.什么是XSS攻击，如何避免？
+XSS攻击：即跨站脚本攻击，它是Web程序中常见的漏洞，原理是攻击者往Web页面里插入恶意的脚本代码，当用户浏览该页面时，嵌入其中的脚本代码会被执行。从而达到恶意攻击用户的目的，例如盗取用户cookie，破坏页面结构、重定向到其他网站等。
+
+预防XSS的核心是必须对输入的数据做过滤处理。
+
+### 64.什么是CSRF攻击，如何避免？
+
+CSRF：Cross-Site Request Forgery（中文：跨站请求伪造），可以理解为攻击者盗用了你的身份，以你的名义发送恶意请求，比如：以你名义发送邮件、发消息、购买商品，虚拟货币转账等。
+防御手段：
+- 验证请求来源地址；
+- 关键操作添加验证码；
+- 在请求地址添加 token 并验证。
+
+## 异常
+
+### 65.throw和throws的区别
+throw 真实抛出一个异常
+
+throws：是声明可能会抛出一个异常。
+
+### 66.try-catch-finally 中，如果 try或catch 中 return 了，finally 还会执行吗？
+try-catch-finally 其中 catch 和 finally 都可以被省略，但是不能同时省略，也就是说有 try 的时候，必须后面跟一个 catch 或者 finally。
+
+finally 一定会执行，即使是 try/catch 中 return 了，catch 中的 return 会等 finally 中的代码执行完之后，才会执行。需要注意的是，最终return的值以try或catch中为准。
+
+### 67.常见的异常类有哪些？
+- NullPointerException 空指针异常
+- ClassNotFoundException 指定类不存在
+- NumberFormatException 字符串转换为数字异常
+- IndexOutOfBoundsException 数组下标越界异常
+- ClassCastException 数据类型转换异常
+- FileNotFoundException 文件未找到异常
+- NoSuchMethodException 方法不存在异常
+- IOException IO 异常
+- SocketException Socket 异常
+
+## 网络
+
+### 68.http常见响应码
+
+- 200 (成功) 服务器已成功处理了请求。 通常，这表示服务器提供了请求的网页。
+- 301 (永久移动) 请求的网页已永久移动到新位置。 服务器返回此响应(对 GET 或 HEAD 请求的响应)时，会自动将请求者转到新位置。
+- 304 (未修改) 自从上次请求后，请求的网页未修改过。 服务器返回此响应时，不会返回网页内容。
+- 404 (未找到) 服务器找不到请求的网页。
+- 500 (服务器内部错误) 服务器遇到错误，无法完成请求。
+
+### 69.forward和redirt的区别？
+
+forward是转发，redirect是重定向。
+地址栏url现实：forward url不会发生改变，redirect url会发生变化
+
+数据共享： forward可以共享request里面的数据，redirect不能共享。
+
+效率： forward比redirect效率高。
+
+### 70.tcp和udp的区别。
+tcp 和 udp 是 OSI 模型中的运输层中的协议。tcp 提供可靠的通信传输，而 udp 则常被用于让广播和细节控制交给应用的通信传输。
+
+两者的区别大致如下：
+- tcp 面向连接，udp 面向非连接即发送数据前不需要建立链接；
+- tcp 提供可靠的服务（数据传输），udp 无法保证；udp使用尽最大努力交付，即不保证可靠交付，同时也不使用拥塞控制。
+- udp支持一对一，一对多，多对一，多对多的交互通信。
+- UDP的首部开销小，只有8个字节。TCP首部最低20个字节。
+- 每条tcp连接只能有两个端点（endpoint）每一条TCP连接只能是点对点的（即一对一），所以tcp提供全双工通信
+- tcp 面向字节流，udp 面向报文；
+- tcp 数据传输慢，udp 数据传输快；
+- TCP提供拥塞控制和流量控制，而UDP不提供。
+
+### 71.tcp为什么要三次握手，挥手却是四次。两次握手不行吗？为什么。以及为什么要四次挥手。
+
+首先介绍**三次握手**的过程：
+1. 第一次握手：建立连接时，客户端A发送SYN包(SYN=j)到服务器B，并进入SYN_SEND状态，等待服务器B确认。
+2. 第二次握手：服务器B收到SYN包，必须确认客户A的SYN(ACK=j+1),同时自己也发送一个SYN包(SYN=k)即SYN+ACK包，此时服务器B进入SYN_RECV状态。
+3. 第三次握手：客户端A收到服务器B的SYN+ACK包，向服务器B发送确认包ACK(ack=k+1)此包发送完毕，完成三次握手。客户端与服务器开始传送数据。
+
+**四次握手**过程：
+由于TCP连接是全双工的，因此每个方向都必须单独进行关闭。这个原则是当一方完成他的数据发送任务后就能发送一个FIN来终止这个方向的连接(主动关闭)。收到一个FIN只意味着这一方向上没有数据流动。一个TCP连接在收到一个FIN后仍能发送数据。首先进行关闭的一方将执行主动关闭，而另一方执行被动关闭。
+1. 客户端A发送一个FIN，用来关闭客户A到服务器B的数据传送。
+2. 服务器B收到这个FIN，它发回一个ACK，确认序号为收到的序号+1.
+3. 服务器B关闭与客户端A的连接，发送一个FIN给客户端A。
+4. 客户端A发回ACK报文确认，并将确认序号设置为收到序号+1。
+
+如果采用两次握手，那么只要服务器发出确认数据包就会建立连接，但由于客户端此时并未响应服务器端的请求，那此时服务器端就会一直在等待客户端，这样服务器端就白白浪费了一定的资源。若采用三次握手，服务器端没有收到来自客户端的再次确认，则就会知道客户端并没有要求建立请求，就不会浪费服务器资源。
+
+在TCP连接中，服务器端的SYN和ACK向客户端发送时一次性发送的，而在断开连接的过程中，B端向A端发送的ACK和FIN是分开发送的。因为在B端接收到A端的FIN后，B端可能还有数据要传输，所以先发送ACK，等B端处理完自己的事情就可以发送FIN断开连接了。
+### 72.tcp粘包是怎么产生的？
+
+tcp粘包可能发生在发送端或者接收端，分别来看两端各种产生粘包的原因。
+
+- 发送端粘包：发送端需要等缓冲区满才发送出去，造成粘包。
+- 接收方粘包： 接收方不及时接收缓冲区的包，造成多个包接收。
+
+### 73.OSI七层模型都有哪些？
+- 物理层:利用传输介质为数据链路层提供物理连接。实现比特流的透明传输。
+- 数据链路层：负责建立和管理节点间的链路。
+- 网络层：通过路由选择算法，为报文或分组通过通信子网选择最适当的路径。
+- 传输层：向用户提供可靠的端对端的差错和流量控制，保证报文的正确传输。
+- 会话层：向两个实体的表示层提供建立和使用连接的方法。
+- 表示层：处理用户信息的表示问题，如编码，数据格式转换和加密解密等。
+- 应用层：直接向用户提供服务，完成用户希望在网络上完成的各种工作。
+
+
+### 74.get和post请求有何区别？
+- get被强制服务器支持。
+- 浏览器对URL的长度有限制，所以GET请求不能代替POST请求发送大量数据。
+- get 请求会被浏览器主动缓存，而 post 不会。
+- get 传递参数有大小限制，而 post 没有。
+- get请求是幂等的
+- post 参数传输更安全，get 的参数会明文限制在 url 上，post 不会。
+
+
+### 75.http与https的区别？
+- http是HTTP协议运行在TCP之上，所有传输的内容都是明文，客户端和服务器端都无法验证对方的身份。
+- https是HTTP运行在SSL之上，SSL运行在TCP之上，所有的传输内容都经过加密，加密采用对称加密。
+- http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。
+- http和https使用的是完全不同的连接方式用的端口也不一样，前者是80端口，后者是443端口。
+- http的连接很简单，是无状态的。
+- https协议是由SSL+http协议构建的可进行加密传输，身份认证的网络协议，要比http协议安全。
+
+## 设计模式
+### 76.常用的设计模式：
+- 单例模式：保证被创建一次，节省系统开销(常考必须记住。)
+- 工厂模式(简单工厂，抽象工厂)：解耦代码.
+- 观察者模式： 定义了对象之间的一对多的依赖，这样一来，当一个对象改变时，它的所有的依赖者都会收到通知并自动更新。
+- 待更新
+
+### 77.简单工厂和抽象工厂有什么区别？
+- 简单工厂：用来生成同一等级结构中的任意产品，对于增加新的产品，无能为力。
+- 抽象工厂：
+
+
+## Spring/SpringMVC
+
+### 78.为什么要使用Spring？
+- spring 提供 ioc 技术，容器会帮你管理依赖的对象，从而不需要自己创建和管理依赖对象了，更轻松的实现了程序的解耦。
+- spring 提供了事务支持，使得事务操作变的更加方便。
+- spring 提供了面向切片编程，这样可以更方便的处理某一类的问题。
+更方便的框架集成，spring 可以很方便的集成其他框架，比如 MyBatis、hibernate 等。
+
+### 79.简单解释什么是aop，什么是ioc？
+aop是面向切面编程，通过预编译方式和运行期动态代理实现程序功能的统一维护的一种技术。
+简单来说就是统一处理某一“切面”的问题的编程思想，比如统一处理日志，异常等。
+
+ioc：Inversionof Control（中文：控制反转）是 spring 的核心，对于 spring 框架来说，就是由 spring 来负责控制对象的生命周期和对象间的关系。
+
+简单来说，控制指的是当前对象对内部成员的控制权；控制反转指的是，这种控制权不由当前对象管理了，由其他（类,第三方容器）来管理。
+
+### 80.Spring有哪些模块？
+- spring core：框架最基础的部分，提供ioc和依赖注入特性。
+- spring context: 构建与core封装包基础上的context封装包，提供了一种框架式的对象访问方法。
+- spring dao： Data Access Object提供了JDBC的抽象层。
+- spring aop：提供了面向切面的编程实现，让你可以自定义拦截器、切点等。
+- spring web：提供了针对web开发的集成特性，例如文件上传，利用servlet listener进行ioc容器初始化和针对Web的ApplicationContext。
+- spring Web mvc：spring中的mvc封装包提供了web应用的Model-View-Controller（MVC）的实现。
+
+### 81.spring常用的注入方式？
+- setter属性注入
+- 构造方法注入
+- 注解方式注入
+
+### 82.spring中的bean是线程安全的吗？
+
+spring中的bean默认是单例模式，spring框架并没有对单例bean进行多线程的封装处理。实际上大部分时候，spring bean是无状态的，所以某种程度上来说bean是安全的。但如果bean是有状态的，那需要开发者自己去保证线程安全，最简单的就是改变bean的作用域，把singleton变更为prototype，这样请求bean相当于new Bean()了，所以就可以保证线程安全了。
+- 有状态就是有数据存储功能。
+- 无状态就是不会保存数据。
+
+### 83.spring支持几种bean的作用域？
+spring支持5种作用域，如下：
+- singleton ：spring ioc容器中只存在一个bean实例，bean以单例模式存在，是系统默认值。
+- prototype：每次从容器调用bean时都会创建一个新的实例，即每次getBean()相当于执行new Bean()操作。
+- Web环境下的作用域：
+ - request：每次http请求都会创建一个bean；
+ - session：同一个http session 共享一个bean实例。
+ - global-session 用于portlet容器，因为每个portlet有单独的session，globalsession提供一个全局性的http session。
+ 
+  **注意**： 使用 prototype 作用域需要慎重的思考，因为频繁创建和销毁 bean 会带来很大的性能开销。
+
+### 84.Spring事务以及隔离级别
+首先，需要明白事务的概念。
+事务就是一组操作数据库的动作集合。事务是现代数据库理论中的核心概念之一。如果一组=处理步骤或者全部发生或者一步也不执行，我们称该组处理步骤为一个事务。
+当所有的步骤像一个操作一样被完整的执行，我们称该事务被提交。由于其中的一部分或多步执行失败，导致没有步骤被提交，则事务必须回滚到最初的系统状态。
+
+在Spring中，有五大隔离级别，七个事务传播属性。
+七个事务传播属性：
+- PROPAGATION_REQUIRED 支持当前事务，如果当前没有事务，就新建一个事务，这是常见的选择。
+- PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务的方式执行。
+- PROPAGATION_MANDATORY 支持当前事务，如果当前没有事务，就抛出异常。
+- PROPAGATION_NOT_SUPPORTED 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+- PROPAGATION_NEVER  以非事务方式执行，如果当前存在事务，则抛出异常。
+- PROPAGATION_NESTED  如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则进行与PROPAGATION_REQUIRED类似的操作。
+
+备注：常用的两个事务传播属性是1和4，即PROPAGATION_REQUIRED，PROPAGATION_REQUIRES_NEW
+
+五个隔离级别：
+- ISOLATION_DEFAULT 这是一个PlatfromTransactionManager默认的隔离级别，使用数据库默认的事务隔离级别，另外四个与JDBC的隔离级别相对应。
+- ISOLATION_READ_UNCOMMITTED （未提交读） 这是事务最低的隔离级别，它允许另外一个事务可以看到这个事务提交的数据。这个隔离级别会产生脏读，不可重复读和幻读。
+- ISOLATION_READ_COMMITTED （提交读）
+保证一个事务修改的数据提交后才能被另外一个事务读取，另外一个事务不能读取该事务未提交的数据。这种事务隔离级别可以避免脏读出现，但是可能会出现不可重复读和幻读。
+- ISOLATION_REPEATABLE_READ（可重复读）
+这种事务隔离级别可以防止脏读，不可重复读。但是可能出现幻读。它除了保证一个事务不能读取另一个事务未提交的数据外，还保证了避免不可重复读的产生。
+
+ISOLATION_SERIALIZABLE(序列化)
+这是花费最高代价，但是最可靠的事务隔离级别。事务被处理为顺序执行。可避免脏读，不可重复读，幻读。
+
+脏读 ：表示一个事务能够读取另一个事务中还未提交的数据。比如，某个事务尝试插入记录 A，此时该事务还未提交，然后另一个事务尝试读取到了记录 A。
+
+不可重复读 ：是指在一个事务内，多次读同一数据。
+
+幻读 ：指同一个事务内多次查询返回的结果集不一样。比如同一个事务 A 第一次查询时候有 n 条记录，但是第二次同等条件下查询却有 n+1 条记录，这就好像产生了幻觉。发生幻读的原因也是另外一个事务新增或者删除或者修改了第一个事务结果集里面的数据，同一个记录的数据内容被修改了，所有数据行的记录就变多或者变少了
+
+### 85.Spring mvc运行流程
+- spring mvc 先将请求发送给DispatcherServlet.
+- DispatcherServlet查询一个或多个HandlerMapping，找到处理请求的Controller。
+- DispatcherServlet再把请求提交到对应的Controller。
+- Controller进行业务逻辑处理后，会返回一个ModelAndView。
+- Dispatcher查询一个或多个ViewResolver视图解析器，找到ModelAndView对象指定的视图对象。
+- 视图对象负责渲染返回给客户端。
+
+### 86.spring mvc有哪些组件？
+- 前置控制器 DispatcherServlet。
+- 映射控制器 HandlerMapping。
+- 处理器 Controller。
+- 模型和视图 ModelAndView。
+- 视图解析器 ViewResolver。
+
+### 87.@RequestMapping的作用是什么？
+将http请求映射到相应的类或方法上。
+
+### 88.@Autowired的作用是什么？
+@Autowired它可以对类成员变量、方法及构造函数进行标注，完成自动装配的工作，通过@Autowired的使用来消除set/get方法。
